@@ -14,3 +14,5 @@ export DATA=/Users/markneedham/projects/yelp-graph-algorithms/data/
     --relationships:REVIEWS $DATA/review_REVIEWS_business_header.csv,$DATA/review_REVIEWS_business.csv \
     --ignore-missing-nodes=true \
     --multiline-fields=true
+
+

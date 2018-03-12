@@ -43,31 +43,120 @@ ORDER BY cooccurences DESC
 
 ```
 CALL algo.labelPropagation.stream(
-    "MATCH (:Category {name: 'Hotels'})<-[:IN_CATEGORY]-(b) RETURN id(b) AS id",
+    "MATCH (b:Business)-[:IN_CATEGORY]->(hotels:Category {name: 'Hotels'})
+     WHERE (b)<-[:REVIEWS]-()<-[:WROTE]-()-[:WROTE]->()-[:REVIEWS]->()-[:IN_CATEGORY]->(hotels)
+     RETURN id(b) AS id",
     "MATCH (hotels:Category {name: 'Hotels' })<-[:IN_CATEGORY]-(b1)<-[:REVIEWS]-(r1)<-[:WROTE]-()-[:WROTE]->(r2)-[:REVIEWS]->(b2)-[:IN_CATEGORY]->(hotels)
-     WHERE id(b1) < id(b2)
-     RETURN id(b1) AS source, id(b2) AS target, count(*) as weight",
+     WHERE id(b1) < id(b2) AND r1.stars = r2.stars
+     WITH id(b1) AS source, id(b2) AS target, count(*) as weight
+     RETURN source, target, weight",
     {graph: "cypher"}
 )
 YIELD nodeId, label
-RETURN label, count(*) AS size
+RETURN label, count(*) AS size, collect(nodeId)[..5] AS nodes
+ORDER BY size DESC;
+```
+
+```
+CALL algo.labelPropagation.stream(
+    "MATCH (b:Business)-[:IN_CATEGORY]->(hotels:Category {name: 'Hotels'})
+     WHERE (b)<-[:REVIEWS]-()<-[:WROTE]-()-[:WROTE]->()-[:REVIEWS]->()-[:IN_CATEGORY]->(hotels)
+     RETURN id(b) AS id",
+    "MATCH (hotels:Category {name: 'Hotels' })<-[:IN_CATEGORY]-(b1)<-[:REVIEWS]-(r1)<-[:WROTE]-()-[:WROTE]->(r2)-[:REVIEWS]->(b2)-[:IN_CATEGORY]->(hotels)
+     WHERE id(b1) < id(b2)
+     WITH id(b1) AS source, id(b2) AS target, apoc.algo.euclideanSimilarity(collect(r1.stars), collect(r2.stars)) AS weight
+     WHERE weight > 0.5
+     RETURN source, target, weight",
+    {graph: "cypher"}
+)
+YIELD nodeId, label
+RETURN label, count(*) AS size, collect(nodeId)[..5] AS nodes
+ORDER BY size DESC;
+```
+
+```
+CALL algo.unionFind.stream(
+    "MATCH (b:Business)-[:IN_CATEGORY]->(hotels:Category {name: 'Hotels'})
+     WHERE (b)<-[:REVIEWS]-()<-[:WROTE]-()-[:WROTE]->()-[:REVIEWS]->()-[:IN_CATEGORY]->(hotels)
+     RETURN id(b) AS id",
+    "MATCH (hotels:Category {name: 'Hotels' })<-[:IN_CATEGORY]-(b1)<-[:REVIEWS]-(r1)<-[:WROTE]-()-[:WROTE]->(r2)-[:REVIEWS]->(b2)-[:IN_CATEGORY]->(hotels)
+     WHERE id(b1) < id(b2)
+     RETURN id(b1) AS source, id(b2) AS target, count(*) as weight",
+    {graph: "cypher", iterations:10}
+)
+YIELD nodeId, setId
+RETURN setId, count(*) AS size, collect(nodeId)[..5] AS nodes
 ORDER BY size DESC;
 ```
 
 ```
 CALL algo.louvain.stream(
-    "MATCH (:Category {name: 'Hotels'})<-[:IN_CATEGORY]-(b) RETURN id(b) AS id",
+    "MATCH (b:Business)-[:IN_CATEGORY]->(hotels:Category {name: 'Hotels'})
+     WHERE (b)<-[:REVIEWS]-()<-[:WROTE]-()-[:WROTE]->()-[:REVIEWS]->()-[:IN_CATEGORY]->(hotels)
+     RETURN id(b) AS id",
     "MATCH (hotels:Category {name: 'Hotels' })<-[:IN_CATEGORY]-(b1)<-[:REVIEWS]-(r1)<-[:WROTE]-()-[:WROTE]->(r2)-[:REVIEWS]->(b2)-[:IN_CATEGORY]->(hotels)
-     WHERE id(b1) < id(b2)
-     WITH b1, b2, count(*) as weight
-     //WHERE weight > 5
-     RETURN id(b1) AS source, id(b2) AS target, weight",
+     WHERE id(b1) < id(b2) AND r1.stars = r2.stars
+     WITH id(b1) AS source, id(b2) AS target, count(*) as weight
+     RETURN source, target, weight",
     {graph: "cypher"}
 )
 YIELD nodeId, community
-RETURN community, count(*) AS size
+RETURN community, count(*) AS size, collect(nodeId)[..5]
 ORDER BY size DESC;
 ```
+
+
+```
+MATCH (hotels:Category {name: 'Hotels' })<-[:IN_CATEGORY]-(b1)<-[:REVIEWS]-(r1)<-[:WROTE]-()-[:WROTE]->(r2)-[:REVIEWS]->(b2)-[:IN_CATEGORY]->(hotels)
+WHERE id(b1) < id(b2)
+WITH id(b1) AS source, id(b2) AS target, apoc.algo.euclideanSimilarity(collect(r1.stars), collect(r2.stars)) AS weight
+WITH source, target, weight
+RETURN avg(weight), max(weight), min(weight), apoc.agg.percentiles(weight,[0.5,0.75,0.9,0.95,0.99])
+```
+
+```
+CALL algo.labelPropagation.stream(
+    "MATCH (b:Business)-[:IN_CATEGORY]->(hotels:Category {name: 'Hotels'})
+     WHERE (b)<-[:REVIEWS]-()<-[:WROTE]-()-[:WROTE]->()-[:REVIEWS]->()-[:IN_CATEGORY]->(hotels)
+     RETURN id(b) AS id",
+    "MATCH (hotels:Category {name: 'Hotels' })<-[:IN_CATEGORY]-(b1)<-[:REVIEWS]-(r1)<-[:WROTE]-()-[:WROTE]->(r2)-[:REVIEWS]->(b2)-[:IN_CATEGORY]->(hotels)
+     WHERE id(b1) < id(b2)
+     WITH id(b1) AS source, id(b2) AS target, apoc.algo.euclideanSimilarity(collect(r1.stars), collect(r2.stars)) AS weight
+     WHERE weight > 0.5147053985573891
+     RETURN source, target, weight",
+    {graph: "cypher"}
+)
+YIELD nodeId, label
+RETURN label, count(*) AS size, collect(nodeId)[..5] AS nodes
+ORDER BY size DESC;
+```
+
+```
+MATCH (hotels:Category {name: 'Hotels' })<-[:IN_CATEGORY]-(b1)<-[:REVIEWS]-(r1)<-[:WROTE]-()-[:WROTE]->(r2)-[:REVIEWS]->(b2)-[:IN_CATEGORY]->(hotels)
+WHERE id(b1) < id(b2)
+WITH id(b1) AS source, id(b2) AS target, apoc.algo.euclideanDistance(collect(r1.stars), collect(r2.stars)) AS weight
+WITH source, target, weight
+RETURN avg(weight), max(weight), min(weight), apoc.agg.percentiles(weight,[0.5,0.75,0.9,0.95,0.99])
+```
+
+```
+CALL algo.labelPropagation.stream(
+    "MATCH (b:Business)-[:IN_CATEGORY]->(hotels:Category {name: 'Hotels'})
+     WHERE (b)<-[:REVIEWS]-()<-[:WROTE]-()-[:WROTE]->()-[:REVIEWS]->()-[:IN_CATEGORY]->(hotels)
+     RETURN id(b) AS id",
+    "MATCH (hotels:Category {name: 'Hotels' })<-[:IN_CATEGORY]-(b1)<-[:REVIEWS]-(r1)<-[:WROTE]-()-[:WROTE]->(r2)-[:REVIEWS]->(b2)-[:IN_CATEGORY]->(hotels)
+     WHERE id(b1) < id(b2)
+     WITH id(b1) AS source, id(b2) AS target, apoc.algo.euclideanDistance(collect(r1.stars), collect(r2.stars)) AS weight
+     WHERE weight > 1
+     RETURN source, target, weight",
+    {graph: "cypher"}
+)
+YIELD nodeId, label
+RETURN label, count(*) AS size, collect(nodeId)[..5] AS nodes
+ORDER BY size DESC;
+```
+
+== Important Hotels
 
 ```
 CALL algo.pageRank.stream(
@@ -82,4 +171,49 @@ YIELD nodeId, score
 MATCH (b:Business) WHERE id(b) = nodeId
 RETURN b.name AS business, score
 ORDER BY score DESC;
+```
+
+```
+CALL algo.pageRank(
+    "MATCH (:Category {name: 'Hotels'})<-[:IN_CATEGORY]-(b) RETURN id(b) AS id",
+    "MATCH (hotels:Category {name: 'Hotels' })<-[:IN_CATEGORY]-(b1)<-[:REVIEWS]-(r1)<-[:WROTE]-()-[:WROTE]->(r2)-[:REVIEWS]->(b2)-[:IN_CATEGORY]->(hotels)
+     WHERE id(b1) < id(b2)
+     RETURN id(b1) AS source, id(b2) AS target, count(*) as weight",
+    {graph: "cypher", write: true}
+)
+```
+
+== Influential hotel reviewers
+
+```
+MATCH (u:User)-[:WROTE]->()-[:REVIEWS]->(b:Business)-[:IN_CATEGORY]->(:Category {name: "Hotels"})
+RETURN id(u) AS user
+```
+
+```
+CALL algo.pageRank(
+    "MATCH (u:User)-[:WROTE]->()-[:REVIEWS]->(b:Business)-[:IN_CATEGORY]->(:Category {name: 'Hotels'})
+     WITH u, count(*) AS reviews
+     WHERE reviews > 5
+     RETURN id(u) AS id",
+    "MATCH (u1:User)-[:WROTE]->()-[:REVIEWS]->()-[:IN_CATEGORY]->(:Category {name: 'Hotels'})
+     MATCH (u1)-[:FRIENDS]->(u2)
+     WHERE id(u1) < id(u2)
+     RETURN id(u1) AS source, id(u2) AS target",
+    {graph: "cypher", write: true, direction: "both", writeProperty: "hotelPageRank"}
+)
+```
+
+
+```
+CALL algo.pageRank(
+    "MATCH (u:User)-[:WROTE]->()-[:REVIEWS]->(b:Business)-[:IN_CATEGORY]->(:Category {name: 'Hotels'})
+     WITH u, count(*) AS reviews
+     WHERE reviews > 5
+     RETURN id(u) AS id",
+    "MATCH (u1:User)-[:FRIENDS]->(u2)
+     WHERE id(u1) < id(u2)
+     RETURN id(u1) AS source, id(u2) AS target",
+    {graph: "cypher", write: true, direction: "both", writeProperty: "hotelPageRank"}
+)
 ```
