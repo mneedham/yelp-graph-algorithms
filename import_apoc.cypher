@@ -29,3 +29,20 @@ MERGE (r:Review {id:value.review_id})
 MERGE (u)-[:WROTE]->(r)
 MERGE (r)-[:REVIEWS]->(b)
 SET r += apoc.map.clean(value, ['business_id','user_id','review_id'], []);
+
+
+CALL algo.unionFind.stream(
+  'match (o:output)-[:locked]->(a) with a limit 10000000 return id(a) as id',
+  'match (o:output)-[:locked]->(a) with o limit 10000000
+   match (o)-[:in]->(tx)-[:out]->(o2)-[:locked]->(a2)
+   return id(a) as source, id(a2) as target, count(tx) as weight',
+  {graph:'cypher'})
+YIELD setId as cluster, nodeId
+RETURN cluster, count(*) AS size
+ORDER BY size DESC
+LIMIT 10;
+
+
+
+
+
