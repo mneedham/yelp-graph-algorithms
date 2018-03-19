@@ -14,7 +14,7 @@ python json_to_csv.py
 python lat_long_expansion.py
 ```
 
-* Navigate to the directory containing the Neo4j Admin Tool and run the following command;
+* Navigate to the Neo4j home directory and run the following command:
 
 ```
 sh /path/to/import.sh
