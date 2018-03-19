@@ -33,8 +33,7 @@ if not os.path.isfile("data/city_header.csv"):
         write_header("data/city_header.csv", ['name:ID(City)'])
         write_header("data/business_IN_CITY_city_header.csv", [':START_ID(Business)', ':END_ID(City)'])
 
-        business_city_writer = csv.writer(business_city_csv, escapechar='\\', quotechar='"',
-                                                  quoting=csv.QUOTE_ALL)
+        business_city_writer = csv.writer(business_city_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
         city_writer = csv.writer(city_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
 
         unique_cities = set()
@@ -46,12 +45,52 @@ if not os.path.isfile("data/city_header.csv"):
                 business_city_writer.writerow([item["business_id"], item["city"]])
 
         for city in unique_cities:
-            try:
-                city_writer.writerow([city])
-            except Exception as e:
-                print(city)
-                raise e
+            city_writer.writerow([city])
 
+if not os.path.isfile("data/area_header.csv"):
+    with open("dataset/businessLocations.json") as business_locations_json, \
+            open("data/area.csv", "w") as area_csv, \
+            open("data/country.csv", "w") as country_csv, \
+            open("data/city_IN_AREA_area.csv", "w") as city_area_csv, \
+            open("data/area_IN_COUNTRY_country.csv", "w") as area_country_csv:
+        input = json.load(business_locations_json)
+
+        write_header("data/area_header.csv", ['name:ID(Area)'])
+        write_header("data/country_header.csv", ['name:ID(Country)'])
+
+        write_header("data/city_IN_AREA_area_header.csv", [':START_ID(City)', ':END_ID(Area)'])
+        write_header("data/area_IN_COUNTRY_country_header.csv", [':START_ID(Area)', ':END_ID(Country)'])
+
+        area_writer = csv.writer(area_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+        country_writer = csv.writer(country_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+
+        city_area_writer = csv.writer(city_area_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+        area_country_writer = csv.writer(area_country_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+
+        unique_areas = set()
+        unique_countries = set()
+        unique_city_areas = set()
+        unique_area_countries = set()
+
+        for business_id in input:
+            if input[business_id]["admin1"]:
+                unique_areas.add(input[business_id]["admin1"])
+                unique_countries.add(input[business_id]["country"])
+
+                unique_city_areas.add((input[business_id]["city"], input[business_id]["admin1"]))
+                unique_area_countries.add((input[business_id]["admin1"], input[business_id]["country"]))
+
+        for area in unique_areas:
+            area_writer.writerow([area])
+
+        for country in unique_countries:
+            country_writer.writerow([country])
+
+        for city, area in unique_city_areas:
+            city_area_writer.writerow([city, area])
+
+        for area, country in unique_area_countries:
+            area_country_writer.writerow([area, country])
 
 if not os.path.isfile("data/category_header.csv"):
     with open("dataset/business.json") as business_json, \
