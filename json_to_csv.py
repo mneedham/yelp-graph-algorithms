@@ -12,15 +12,19 @@ if not os.path.isfile("data/business_header.csv"):
     with open("dataset/business.json") as business_json, \
             open("data/business.csv", 'w') as business_csv:
 
-        write_header("data/business_header.csv", ['id:ID(Business)', 'name', 'address', 'city', 'state'])
+        write_header("data/business_header.csv", ['id:ID(Business)', 'name', 'address', 'city', 'state', 'location:Point(WGS-84)'])
 
         business_writer = csv.writer(business_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
 
         for line in business_json.readlines():
             item = json.loads(line)
             try:
-                business_writer.writerow(
-                    [item['business_id'], item['name'], item['address'], item['city'], item['state']])
+                point = ""
+                if "latitude" in item and "longitude" in item:
+                    if item["latitude"] and item["longitude"]:
+                        point = "{latitude: %s, longitude: %s}" % (item["latitude"], item["longitude"])
+
+                business_writer.writerow([item['business_id'], item['name'], item['address'], item['city'], item['state'], point])
             except Exception as e:
                 print(item)
                 raise e
