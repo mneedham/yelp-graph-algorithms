@@ -1,6 +1,6 @@
 = Yelp Dataset Graph
 
-* Download the JSON version of the https://www.yelp.co.uk/dataset/download[Yelp Dataset Challenge^] and extract it into the `dataset` directory
+* Download the JSON version of the https://www.yelp.co.uk/dataset/download[Yelp Dataset Challenge^] and extract it into the `dataset-round12` directory
 
 * Run the following command to create Neo4j Import Tool CSV files:
 
