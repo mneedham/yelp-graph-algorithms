@@ -2,9 +2,10 @@ import json
 
 import reverse_geocoder as rg
 
+source_dir = "dataset-round12"
 lat_longs = {}
 
-with open("dataset/business.json") as business_json:
+with open(f"{source_dir}/yelp_academic_dataset_business.json") as business_json:
     for line in business_json.readlines():
         item = json.loads(line)
         if item["latitude"] and item["longitude"]:
@@ -27,5 +28,5 @@ for business_id, location in zip(business_ids, locations):
         "city": lat_longs[business_id]["city"]
     }
 
-with open("dataset/businessLocations.json", "w") as business_locations_json:
+with open(f"{source_dir}/businessLocations.json", "w") as business_locations_json:
     json.dump(result, business_locations_json, indent=4, sort_keys=True)
