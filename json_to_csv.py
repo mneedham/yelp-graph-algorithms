@@ -146,22 +146,22 @@ if not os.path.isfile(f"{destination_dir}/user_header.csv"):
                     friend_id = friend_id.strip()
                     user_user_writer.writerow([item["user_id"], friend_id])
 
-# if not os.path.isfile(f"{destination_dir}/review_header.csv"):
-#     with open(f"{source_dir}/yelp_academic_dataset_review.json") as review_json, \
-#             open(f"{destination_dir}/review.csv", 'w') as review_csv, \
-#             open(f"{destination_dir}/user_WROTE_review.csv", 'w') as user_review_csv, \
-#             open(f"{destination_dir}/review_REVIEWS_business.csv", 'w') as review_business_csv:
-#
-#         write_header(f"{destination_dir}/review_header.csv", ['id:ID(Review)', 'text', 'stars:int', 'date'])
-#         write_header(f"{destination_dir}/user_WROTE_review_header.csv", [':START_ID(User)', ':END_ID(Review)'])
-#         write_header(f"{destination_dir}/review_REVIEWS_business_header.csv", [':START_ID(Review)', ':END_ID(Business)'])
-#
-#         review_writer = csv.writer(review_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
-#         user_review_writer = csv.writer(user_review_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
-#         review_business_writer = csv.writer(review_business_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
-#
-#         for line in review_json.readlines():
-#             item = json.loads(line)
-#             review_writer.writerow([item["review_id"], item["text"], item["stars"], item["date"]])
-#             user_review_writer.writerow([item["user_id"], item["review_id"]])
-#             review_business_writer.writerow([item["review_id"], item["business_id"]])
+if not os.path.isfile(f"{destination_dir}/review_header.csv"):
+    with open(f"{source_dir}/yelp_academic_dataset_review.json") as review_json, \
+            open(f"{destination_dir}/review.csv", 'w') as review_csv, \
+            open(f"{destination_dir}/user_WROTE_review.csv", 'w') as user_review_csv, \
+            open(f"{destination_dir}/review_REVIEWS_business.csv", 'w') as review_business_csv:
+
+        write_header(f"{destination_dir}/review_header.csv", ['id:ID(Review)', 'text', 'stars:int', 'date'])
+        write_header(f"{destination_dir}/user_WROTE_review_header.csv", [':START_ID(User)', ':END_ID(Review)'])
+        write_header(f"{destination_dir}/review_REVIEWS_business_header.csv", [':START_ID(Review)', ':END_ID(Business)'])
+
+        review_writer = csv.writer(review_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+        user_review_writer = csv.writer(user_review_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+        review_business_writer = csv.writer(review_business_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+
+        for line in review_json.readlines():
+            item = json.loads(line)
+            review_writer.writerow([item["review_id"], item["text"], item["stars"], item["date"]])
+            user_review_writer.writerow([item["user_id"], item["review_id"]])
+            review_business_writer.writerow([item["review_id"], item["business_id"]])
