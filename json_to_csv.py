@@ -165,3 +165,34 @@ if not os.path.isfile(f"{destination_dir}/review_header.csv"):
             review_writer.writerow([item["review_id"], item["text"], item["stars"], item["date"]])
             user_review_writer.writerow([item["user_id"], item["review_id"]])
             review_business_writer.writerow([item["review_id"], item["business_id"]])
+
+if not os.path.isfile(f"{destination_dir}/photo_header.csv"):
+    with open(f"{source_dir}/yelp_academic_dataset_photo_features.csv") as photo_features_csv, \
+         open(f"{source_dir}/yelp_academic_dataset_photo.json") as photo_json, \
+         open(f"{destination_dir}/photo.csv", "w") as photo_csv:
+
+        write_header(f"{destination_dir}/photo_header.csv",
+                     ['id:ID(Photo)', 'embedding', 'caption', 'label'])
+
+        photo_writer = csv.writer(photo_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+
+        photos = {}
+        for line in photo_json.readlines():
+            item = json.loads(line)
+            photos[item["photo_id"]] = {
+                "business_id": item["business_id"],
+                "caption": item["caption"],
+                "label": item["label"]
+            }
+
+        photo_csv_reader = csv.reader(photo_features_csv, delimiter=",")
+        next(photo_csv_reader)
+        for row in photo_csv_reader:
+            photo_id = row[0]
+            embedding = row[1:]
+            photo_details = photos[photo_id]
+            # print(photo_id, embedding, photo_details)
+            photo_writer.writerow([photo_id,
+                                   embedding,
+                                   photo_details["caption"],
+                                   photo_details["label"]])
