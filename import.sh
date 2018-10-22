@@ -2,9 +2,9 @@
 
 export DATA=/home/markhneedham/projects/yelp-graph-algorithms/data-round12/
 
-./bin/neo4j-admin import \
+./bin/neo4j-import \
     --mode=csv \
-    --database=yelp.photo.db \
+    --into=data/databases/yelp.photo.db \
     --nodes:Business $DATA/business_header.csv,$DATA/business.csv \
     --nodes:Category $DATA/category_header.csv,$DATA/category.csv \
     --nodes:User $DATA/user_header.csv,$DATA/user.csv \
@@ -21,8 +21,10 @@ export DATA=/home/markhneedham/projects/yelp-graph-algorithms/data-round12/
     --relationships:IN_AREA $DATA/city_IN_AREA_area_header.csv,$DATA/city_IN_AREA_area.csv \
     --relationships:IN_COUNTRY $DATA/area_IN_COUNTRY_country_header.csv,$DATA/area_IN_COUNTRY_country.csv \
     --relationships:HAS_PHOTO $DATA/business_HAS_PHOTO_photo_header.csv,$DATA/business_HAS_PHOTO_photo.csv \
+    --relationships:WROTE_TIP $DATA/user_WROTE_TIP_business_header.csv,$DATA/user_WROTE_TIP_business.csv \
     --ignore-missing-nodes=true \
-    --report-file=/dev/null \
+    --legacy-style-quoting=false \
+    --bad-tolerance=true \
     --multiline-fields=true
 
 

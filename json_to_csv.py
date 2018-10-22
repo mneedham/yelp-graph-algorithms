@@ -152,7 +152,7 @@ if not os.path.isfile(f"{destination_dir}/review_header.csv"):
             open(f"{destination_dir}/user_WROTE_review.csv", 'w') as user_review_csv, \
             open(f"{destination_dir}/review_REVIEWS_business.csv", 'w') as review_business_csv:
 
-        write_header(f"{destination_dir}/review_header.csv", ['id:ID(Review)', 'text', 'stars:int', 'date'])
+        write_header(f"{destination_dir}/review_header.csv", ['id:ID(Review)', 'text', 'stars:int', 'date:date'])
         write_header(f"{destination_dir}/user_WROTE_review_header.csv", [':START_ID(User)', ':END_ID(Review)'])
         write_header(f"{destination_dir}/review_REVIEWS_business_header.csv", [':START_ID(Review)', ':END_ID(Business)'])
 
@@ -168,20 +168,20 @@ if not os.path.isfile(f"{destination_dir}/review_header.csv"):
 
 if not os.path.isfile(f"{destination_dir}/photo_header.csv"):
     with open(f"{source_dir}/yelp_academic_dataset_photo_features.csv") as photo_features_csv, \
-         open(f"{source_dir}/yelp_academic_dataset_photo.json") as photo_json, \
-         open(f"{destination_dir}/photo.csv", "w") as photo_csv, \
-         open(f"{destination_dir}/business_HAS_PHOTO_photo.csv", 'w') as business_photo_csv:
+         open(f"{source_dir}/yelp_academic_dataset_photo.json") as tip_json, \
+         open(f"{destination_dir}/photo.csv", "w") as tip_csv, \
+         open(f"{destination_dir}/business_HAS_PHOTO_photo.csv", 'w') as user_business_csv:
 
         write_header(f"{destination_dir}/photo_header.csv",
                      ['id:ID(Photo)', 'embedding:double[]', 'caption', 'label'])
         write_header(f"{destination_dir}/business_HAS_PHOTO_photo_header.csv",
                      [':START_ID(Business)', ':END_ID(Photo)'])
 
-        photo_writer = csv.writer(photo_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
-        business_photo_writer = csv.writer(business_photo_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+        tip_writer = csv.writer(tip_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+        user_business_writer = csv.writer(user_business_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
 
         photos = {}
-        for line in photo_json.readlines():
+        for line in tip_json.readlines():
             item = json.loads(line)
             photos[item["photo_id"]] = {
                 "business_id": item["business_id"],
@@ -195,8 +195,24 @@ if not os.path.isfile(f"{destination_dir}/photo_header.csv"):
             photo_id = row[0]
             embedding = [float(item) for item in row[1:]]
             photo_details = photos[photo_id]
-            photo_writer.writerow([photo_id,
+            tip_writer.writerow([photo_id,
                                    ";".join([str(item) for item in embedding]),
-                                   photo_details["caption"],
-                                   photo_details["label"]])
-            business_photo_writer.writerow([photo_details["business_id"], photo_id])
+                                 photo_details["caption"],
+                                 photo_details["label"]])
+            user_business_writer.writerow([photo_details["business_id"], photo_id])
+
+if not os.path.isfile(f"{destination_dir}/user_WROTE_TIP_business_header.csv"):
+    with open(f"{source_dir}/yelp_academic_dataset_tip.json") as tip_json, \
+         open(f"{destination_dir}/user_WROTE_TIP_business.csv", 'w') as user_business_csv:
+
+        write_header(f"{destination_dir}/user_WROTE_TIP_business_header.csv",
+                     [':START_ID(User)', ':END_ID(Business)', 'text', 'date:date', 'likes:int'])
+
+        user_business_writer = csv.writer(user_business_csv, escapechar='\\', quotechar='"', quoting=csv.QUOTE_ALL)
+
+        photos = {}
+        for line in tip_json.readlines():
+            item = json.loads(line)
+            user_business_writer.writerow([
+                item["user_id"], item["business_id"], item["text"], item["date"], item["likes"]
+            ])
