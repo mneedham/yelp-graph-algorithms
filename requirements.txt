@@ -17,4 +17,4 @@ rsa==3.4.2
 s3transfer==0.1.13
 scipy==1.1.0
 six==1.11.0
-urllib3==1.23
+urllib3==1.24.2
