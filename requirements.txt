@@ -13,7 +13,7 @@ python-dateutil==2.7.3
 PyYAML==3.13
 requests==2.21.0
 reverse-geocoder==1.5.1
-rsa==3.4.2
+rsa==4.1
 s3transfer==0.1.13
 scipy==1.1.0
 six==1.11.0
